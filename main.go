@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-	"redis_proxy/redis"
+
+	"github.com/philchia/go_redis_driver/redis"
 )
 
 func main() {
