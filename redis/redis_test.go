@@ -2,8 +2,9 @@ package redis_test
 
 import (
 	"log"
-	"redis_proxy/redis"
 	"testing"
+
+	"github.com/philchia/go_redis_driver/redis"
 )
 
 // func BenchmarkConnection(b *testing.B) {
