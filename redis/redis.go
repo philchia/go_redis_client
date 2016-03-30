@@ -7,7 +7,7 @@ type Conn interface {
 	Exec(cmd string, args ...interface{}) (res Result, err error)
 	Close() error
 	Pipline(cmd string, args ...interface{}) error
-	Flush() error
+	Commit() (res Result, err error)
 }
 
 // Connect generate a new Redis struct pointer

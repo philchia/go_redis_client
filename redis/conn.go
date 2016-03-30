@@ -33,7 +33,7 @@ func (c *connection) Exec(cmd string, args ...interface{}) (res Result, err erro
 	}()
 
 	c.writeCmd(cmd, args...)
-	c.Flush()
+	c.flush()
 	return c.read()
 }
 
@@ -43,7 +43,7 @@ func (c *connection) Pipline(cmd string, args ...interface{}) error {
 }
 
 func (c *connection) Commit() (res Result, err error) {
-	err = c.Flush()
+	err = c.flush()
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *connection) Commit() (res Result, err error) {
 }
 
 //Flush all command
-func (c *connection) Flush() error {
+func (c *connection) flush() error {
 	defer c.clear()
 
 	_, err := c.Con.Write(c.Cmd.Bytes())
