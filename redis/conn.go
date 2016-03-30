@@ -38,7 +38,7 @@ func (c *connection) Exec(cmd string, args ...interface{}) (res Result, err erro
 }
 
 //Pip pipline the command
-func (c *connection) Pip(cmd string, args ...interface{}) error {
+func (c *connection) Pipline(cmd string, args ...interface{}) error {
 	return c.writeCmd(cmd, args...)
 }
 

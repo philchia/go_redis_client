@@ -6,7 +6,7 @@ import "net"
 type Conn interface {
 	Exec(cmd string, args ...interface{}) (res Result, err error)
 	Close() error
-	Pip(cmd string, args ...interface{}) error
+	Pipline(cmd string, args ...interface{}) error
 	Flush() error
 }
 
