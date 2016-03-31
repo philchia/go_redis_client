@@ -10,7 +10,7 @@ go_redis_driver is a redis client for golang
 	}
 	defer con.Close()
 
-	res, err := con.Exec("SET", "name", "Zhai Fei").String()
+	res, err := con.Exec("SET", "name", "your name").String()
 	if err != nil {
 		log.Println(err.Error())
 		return
