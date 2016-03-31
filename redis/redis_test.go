@@ -14,11 +14,11 @@ func BenchmarkSetKey(b *testing.B) {
 			log.Println(err.Error())
 		}
 		conn.Exec("SET", "name", "chia")
-		res, err := conn.Exec("GET", "name")
+		res, err := conn.Exec("GET", "name").String()
 		if err != nil {
 			log.Println(err.Error())
 		}
-		log.Println(res.String())
+		log.Println(res)
 		conn.Close()
 	}
 }

@@ -4,10 +4,10 @@ import "net"
 
 // Conn represent a connection
 type Conn interface {
-	Exec(cmd string, args ...interface{}) (res Result, err error)
+	Exec(cmd string, args ...interface{}) (res Result)
 	Close() error
 	Pipline(cmd string, args ...interface{}) error
-	Commit() (res Result, err error)
+	Commit() (res Result)
 }
 
 // Connect generate a new Redis struct pointer
@@ -20,7 +20,7 @@ func Connect(addr string, auth string) (Conn, error) {
 		Con: tcpConn,
 	}
 	if len(auth) > 0 {
-		_, err := conn.Exec("AUTH", auth)
+		_, err := conn.Exec("AUTH", auth).String()
 		if err != nil {
 			return nil, err
 		}

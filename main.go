@@ -13,18 +13,17 @@ func main() {
 	}
 	defer con.Close()
 
-	res, err := con.Exec("SET", "name", "Zhai Fei")
+	res, err := con.Exec("SET", "name", "Zhai Fei").String()
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-	str, _ := res.String()
-	log.Println(str)
-	res, err = con.Exec("GET", "name")
+
+	log.Println(res)
+	res, err = con.Exec("GET", "name").String()
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-	str, _ = res.String()
-	log.Println(str)
+	log.Println(res)
 }

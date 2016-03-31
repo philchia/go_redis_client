@@ -22,35 +22,38 @@ func (c *connection) Close() error {
 }
 
 // Exec do a single command
-func (c *connection) Exec(cmd string, args ...interface{}) (res Result, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			var ok bool
-			if err, ok = r.(error); ok {
-				res = nil
-			}
-		}
-	}()
+func (c *connection) Exec(cmd string, args ...interface{}) Result {
+	res := new(redisResult)
 
-	c.writeCmd(cmd, args...)
-	c.flush()
-	return c.read()
-}
-
-//Pip pipline the command
-func (c *connection) Pipline(cmd string, args ...interface{}) error {
-	return c.writeCmd(cmd, args...)
-}
-
-func (c *connection) Commit() (res Result, err error) {
+	err := c.writeCmd(cmd, args...)
+	if err != nil {
+		res.Res = err
+		return res
+	}
 	err = c.flush()
 	if err != nil {
-		return nil, err
+		res.Res = err
+		return res
 	}
 	return c.read()
 }
 
-//Flush all command
+//Pipline cache all the command
+func (c *connection) Pipline(cmd string, args ...interface{}) error {
+	return c.writeCmd(cmd, args...)
+}
+
+func (c *connection) Commit() Result {
+	res := new(redisResult)
+
+	err := c.flush()
+	if err != nil {
+		res.Res = err
+		return res
+	}
+	return c.read()
+}
+
 func (c *connection) flush() error {
 	defer c.clear()
 
@@ -62,49 +65,38 @@ func (c *connection) flush() error {
 	return nil
 }
 
-func (c *connection) read() (Result, error) {
+func (c *connection) read() Result {
+	res := &redisResult{}
 	buf := make([]byte, 512)
 	n, err := c.Con.Read(buf)
 	if err != nil {
-		return nil, err
+		res.Res = err
+		return res
 	}
 	tmp := buf[:n]
 
 	switch string(tmp[:1]) {
 	case "+":
-		res := parseResponse(string(tmp[1:]))
-		result := &redisResult{
-			Res: res,
-		}
-		return result, nil
+		str := parseResponse(string(tmp[1:]))
+		res.Res = str
 
 	case "-":
 		err := parseError(string(tmp[1:]))
-		return nil, err
+		res.Res = err
 
 	case "$":
 		str := parseSingleLineString(string(tmp[1:]))
-		result := &redisResult{
-			Res: str,
-		}
-		return result, nil
+		res.Res = str
 
 	case "*":
 		arr := parseArr(string(tmp[1:]))
-		result := &redisResult{
-			Res: arr,
-		}
-		return result, nil
+		res.Res = arr
 
 	case ":":
 		num := parseInt(string(tmp[1:]))
-		result := &redisResult{
-			Res: num,
-		}
-		return result, nil
-
+		res.Res = num
 	}
-	return nil, nil
+	return res
 }
 
 func parseResponse(s string) string {
