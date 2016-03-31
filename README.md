@@ -4,7 +4,7 @@ go_redis_driver is a redis client for golang
 ## how to 
 
 ```go
-	con, err := redis.Connect("127.0.0.1:6379", "112919147")
+	con, err := redis.Connect("127.0.0.1:6379", "password")
 	if err != nil {
 		log.Fatal(err)
 	}
