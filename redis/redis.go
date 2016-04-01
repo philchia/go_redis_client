@@ -10,6 +10,17 @@ type Conn interface {
 	Commit() (res Result)
 }
 
+// Result interface
+type Result interface {
+	String() (string, error)
+	StringArray() ([]string, error)
+	StringMap() (map[string]string, error)
+	Int32() (int32, error)
+	Int64() (int64, error)
+	Array() ([]Result, error)
+	Bool() (bool, error)
+}
+
 // Connect generate a new Redis struct pointer
 func Connect(addr string, auth string) (Conn, error) {
 	tcpConn, err := net.Dial("tcp", addr)

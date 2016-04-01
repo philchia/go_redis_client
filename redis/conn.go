@@ -5,15 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strconv"
-	"strings"
 	"unicode/utf8"
 )
 
 // connection ...
 type connection struct {
-	Con net.Conn
-	Cmd bytes.Buffer
+	Con       net.Conn
+	Cmd       bytes.Buffer
+	QueueSize int
 }
 
 // Close close the connection to redis server
@@ -35,23 +34,25 @@ func (c *connection) Exec(cmd string, args ...interface{}) Result {
 		res.Res = err
 		return res
 	}
+	c.QueueSize = 1
 	return c.read()
 }
 
 //Pipline cache all the command
 func (c *connection) Pipline(cmd string, args ...interface{}) error {
+	if c.QueueSize == 0 {
+		err := c.writeCmd("MULTI")
+		if err != nil {
+			return err
+		}
+		c.QueueSize++
+	}
+	c.QueueSize++
 	return c.writeCmd(cmd, args...)
 }
 
 func (c *connection) Commit() Result {
-	res := new(redisResult)
-
-	err := c.flush()
-	if err != nil {
-		res.Res = err
-		return res
-	}
-	return c.read()
+	return c.Exec("EXEC")
 }
 
 func (c *connection) flush() error {
@@ -66,59 +67,17 @@ func (c *connection) flush() error {
 }
 
 func (c *connection) read() Result {
-	res := &redisResult{}
+	size := c.QueueSize
+	c.QueueSize = 0
 	buf := make([]byte, 512)
 	n, err := c.Con.Read(buf)
 	if err != nil {
+		res := &redisResult{}
 		res.Res = err
 		return res
 	}
-	tmp := buf[:n]
-
-	switch string(tmp[:1]) {
-	case "+":
-		str := parseResponse(string(tmp[1:]))
-		res.Res = str
-
-	case "-":
-		err := parseError(string(tmp[1:]))
-		res.Res = err
-
-	case "$":
-		str := parseSingleLineString(string(tmp[1:]))
-		res.Res = str
-
-	case "*":
-		arr := parseArr(string(tmp[1:]))
-		res.Res = arr
-
-	case ":":
-		num := parseInt(string(tmp[1:]))
-		res.Res = num
-	}
-	return res
-}
-
-func parseResponse(s string) string {
-	return strings.TrimRight(s, "\r\n")
-}
-
-func parseSingleLineString(s string) string {
-	return strings.Split(s, "\r\n")[1]
-}
-
-func parseInt(s string) int {
-	str := strings.TrimRight(s, "\r\n")
-	i, _ := strconv.Atoi(str)
-	return i
-}
-
-func parseArr(s string) []string {
-	return strings.Split(s, "\r\n")[1:]
-}
-
-func parseError(s string) error {
-	return errors.New(strings.TrimRight(s, "\r\n"))
+	tmp := string(buf[:n])
+	return parseResults(tmp, size)
 }
 
 func (c *connection) writeCmd(cmd string, args ...interface{}) (err error) {
