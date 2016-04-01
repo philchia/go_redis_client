@@ -14,15 +14,13 @@ go_redis_driver is a redis client for golang
 
 	res, err := con.Exec("SET", "name", "your name").String()
 	if err != nil {
-		log.Println(err.Error())
-		return
+		log.Fatal(err)
 	}
-
 	log.Println(res)
+	
 	res, err = con.Exec("GET", "name").String()
 	if err != nil {
-		log.Println(err.Error())
-		return
+		log.Fatal(err)
 	}
 	log.Println(res)
 ```
