@@ -73,6 +73,20 @@ func (rr *redisResult) StringMap() (map[string]string, error) {
 		return nil, rr.Res.(error)
 	case map[string]string:
 		return rr.Res.(map[string]string), nil
+	case []string:
+		arr := rr.Res.([]string)
+		length := len(arr)
+		if length%2 != 0 {
+			return nil, errors.New("Result is not string map format")
+		}
+		var m map[string]string
+		for i := 0; i < length; i++ {
+			k := arr[i]
+			i++
+			v := arr[i]
+			m[k] = v
+		}
+		return m, nil
 	}
 	return nil, errors.New("Result is not string map format")
 }
