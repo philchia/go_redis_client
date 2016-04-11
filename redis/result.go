@@ -62,7 +62,17 @@ func (rr *redisResult) StringArray() ([]string, error) {
 		return nil, rr.Res.(error)
 	case []string:
 		return rr.Res.([]string), nil
-
+	case []Result:
+		var arr []string
+		results := rr.Res.([]Result)
+		for _, r := range results {
+			str, err := r.String()
+			if err != nil {
+				return nil, err
+			}
+			arr = append(arr, str)
+		}
+		return arr, nil
 	}
 	return nil, errors.New("Result is not string array format")
 }
@@ -73,17 +83,24 @@ func (rr *redisResult) StringMap() (map[string]string, error) {
 		return nil, rr.Res.(error)
 	case map[string]string:
 		return rr.Res.(map[string]string), nil
-	case []string:
-		arr := rr.Res.([]string)
-		length := len(arr)
+	case []Result:
+		results := rr.Res.([]Result)
+
+		length := len(results)
 		if length%2 != 0 {
-			return nil, errors.New("Result is not string map format")
+			return nil, errors.New("Result is not a string map format")
 		}
-		var m map[string]string
+		m := make(map[string]string)
 		for i := 0; i < length; i++ {
-			k := arr[i]
+			k, err := results[i].String()
+			if err != nil {
+				return nil, err
+			}
 			i++
-			v := arr[i]
+			v, err := results[i].String()
+			if err != nil {
+				return nil, err
+			}
 			m[k] = v
 		}
 		return m, nil

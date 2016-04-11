@@ -28,15 +28,15 @@ func parseResult(scanner *bufio.Scanner) Result {
 		str := scanner.Text()
 		switch str[:1] {
 		case "+":
-			return parseResponse(scanner)
+			return parseResponse(str)
 		case "-":
-			return parseError(scanner)
+			return parseError(str)
 		case "*":
-			return parseArr(scanner)
+			return parseArr(scanner, str)
 		case "$":
-			return parseStr(scanner)
+			return parseStr(scanner, str)
 		case ":":
-			return parseInt(scanner)
+			return parseInt(str)
 		default:
 			return &redisResult{Res: errors.New("Unknow response")}
 		}
@@ -44,16 +44,15 @@ func parseResult(scanner *bufio.Scanner) Result {
 	return nil
 }
 
-func parseResponse(scanner *bufio.Scanner) Result {
-	return &redisResult{Res: scanner.Text()[1:]}
+func parseResponse(str string) Result {
+	return &redisResult{Res: str[1:]}
 }
 
-func parseError(scanner *bufio.Scanner) Result {
-	return &redisResult{Res: errors.New(scanner.Text()[1:])}
+func parseError(str string) Result {
+	return &redisResult{Res: errors.New(str[1:])}
 }
 
-func parseStr(scanner *bufio.Scanner) Result {
-	str := scanner.Text()
+func parseStr(scanner *bufio.Scanner, str string) Result {
 	length := parseLength(str)
 	if length < 0 {
 		return nil
@@ -65,26 +64,22 @@ func parseStr(scanner *bufio.Scanner) Result {
 	return nil
 }
 
-func parseArr(scanner *bufio.Scanner) Result {
-	str := scanner.Text()
+func parseArr(scanner *bufio.Scanner, str string) Result {
 	length := parseLength(str)
 	if length < 0 {
 		return nil
 	}
 	res := make([]Result, length)
 	for i := range res {
-		if scanner.Scan() {
-			res[i] = parseResult(scanner)
-		} else {
-			break
-		}
+		res[i] = parseResult(scanner)
+
 	}
 	return &redisResult{Res: res}
 }
 
-func parseInt(scanner *bufio.Scanner) Result {
-	str := scanner.Text()[1:]
-	i, _ := strconv.Atoi(str)
+func parseInt(str string) Result {
+	a := str[1:]
+	i, _ := strconv.Atoi(a)
 	return &redisResult{Res: i}
 }
 

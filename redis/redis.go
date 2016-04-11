@@ -15,6 +15,7 @@ type Result interface {
 	String() (string, error)
 	StringArray() ([]string, error)
 	StringMap() (map[string]string, error)
+	Int() (int, error)
 	Int32() (int32, error)
 	Int64() (int64, error)
 	Array() ([]Result, error)
