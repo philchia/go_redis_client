@@ -12,7 +12,7 @@ import (
 // connection ...
 type connection struct {
 	Con       net.Conn
-	Cmd       bytes.Buffer
+	Cmd       *bytes.Buffer
 	QueueSize int
 }
 
@@ -86,6 +86,8 @@ func (c *connection) writeCmd(cmd string, args ...interface{}) (err error) {
 			c.writeInt32(arg.(int32))
 		case int64:
 			c.writeInt64(arg.(int64))
+		case int:
+			c.writeInt(arg.(int))
 		case []byte:
 			c.writeBytes(arg.([]byte))
 		case float32:
@@ -129,13 +131,18 @@ func (c *connection) writeInt64(i int64) {
 	c.writeString(str)
 }
 
-func (c *connection) writeFloat64(f float64) {
-	str := fmt.Sprint(f)
+func (c *connection) writeInt32(i int32) {
+	str := fmt.Sprint(i)
 	c.writeString(str)
 }
 
-func (c *connection) writeInt32(i int32) {
+func (c *connection) writeInt(i int) {
 	str := fmt.Sprint(i)
+	c.writeString(str)
+}
+
+func (c *connection) writeFloat64(f float64) {
+	str := fmt.Sprint(f)
 	c.writeString(str)
 }
 

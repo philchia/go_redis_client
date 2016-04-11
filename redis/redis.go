@@ -1,6 +1,9 @@
 package redis
 
-import "net"
+import (
+	"bytes"
+	"net"
+)
 
 // Conn represent a connection
 type Conn interface {
@@ -30,6 +33,7 @@ func Connect(addr string, auth string) (Conn, error) {
 	}
 	conn := &connection{
 		Con: tcpConn,
+		Cmd: new(bytes.Buffer),
 	}
 	if len(auth) > 0 {
 		_, err := conn.Exec("AUTH", auth).String()

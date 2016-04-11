@@ -1,6 +1,9 @@
 package redis
 
-import "errors"
+import (
+	"errors"
+	"strconv"
+)
 
 type redisResult struct {
 	Res interface{}
@@ -26,6 +29,8 @@ func (rr *redisResult) Int() (int, error) {
 		return -1, rr.Res.(error)
 	case int:
 		return rr.Res.(int), nil
+	case string:
+		return strconv.Atoi(rr.Res.(string))
 	}
 	return -1, errors.New("Result is not int format")
 }
@@ -40,6 +45,12 @@ func (rr *redisResult) Int32() (int32, error) {
 		return int32(rr.Res.(int64)), nil
 	case int32:
 		return rr.Res.(int32), nil
+	case string:
+		i, err := strconv.Atoi(rr.Res.(string))
+		if err != nil {
+			return -1, err
+		}
+		return int32(i), nil
 	}
 	return -1, errors.New("Result is not int32 format")
 }
@@ -54,6 +65,12 @@ func (rr *redisResult) Int64() (int64, error) {
 		return rr.Res.(int64), nil
 	case int32:
 		return int64(rr.Res.(int32)), nil
+	case string:
+		i, err := strconv.Atoi(rr.Res.(string))
+		if err != nil {
+			return -1, err
+		}
+		return int64(i), nil
 	}
 	return -1, errors.New("Result is not int64 format")
 }

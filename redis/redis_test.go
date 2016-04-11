@@ -8,7 +8,7 @@ import (
 	"github.com/philchia/go_redis_driver/redis"
 )
 
-func TestSetGetKey(t *testing.T) {
+func TestSetGetString(t *testing.T) {
 	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
 	if err != nil {
 		t.Fatal(err)
@@ -16,12 +16,33 @@ func TestSetGetKey(t *testing.T) {
 	defer conn.Close()
 
 	conn.Exec("SET", "name", "chia")
+
 	res, err := conn.Exec("GET", "name").String()
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if res != "chia" {
 		t.Fatal("Get wrong name")
+	}
+}
+
+func TestSetGetInt(t *testing.T) {
+
+	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	conn.Exec("SET", "age", 25)
+
+	res, err := conn.Exec("GET", "age").Int()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res != 25 {
+		t.Fatal("Get wrong age")
 	}
 }
 
