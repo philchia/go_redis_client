@@ -21,6 +21,8 @@ type Result interface {
 	Int() (int, error)
 	Int32() (int32, error)
 	Int64() (int64, error)
+	Float32() (float32, error)
+	Float64() (float64, error)
 	Array() ([]Result, error)
 	Bool() (bool, error)
 }

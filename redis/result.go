@@ -75,6 +75,46 @@ func (rr *redisResult) Int64() (int64, error) {
 	return -1, errors.New("Result is not int64 format")
 }
 
+func (rr *redisResult) Float32() (float32, error) {
+	switch rr.Res.(type) {
+	case error:
+		return -1, rr.Res.(error)
+	case int:
+		return float32(rr.Res.(int)), nil
+	case int64:
+		return float32(rr.Res.(int64)), nil
+	case int32:
+		return float32(rr.Res.(int32)), nil
+	case string:
+		f, err := strconv.ParseFloat(rr.Res.(string), 32)
+		if err != nil {
+			return -1, err
+		}
+		return float32(f), nil
+	}
+	return -1, errors.New("Result is not float32 format")
+}
+
+func (rr *redisResult) Float64() (float64, error) {
+	switch rr.Res.(type) {
+	case error:
+		return -1, rr.Res.(error)
+	case int:
+		return float64(rr.Res.(int)), nil
+	case int64:
+		return float64(rr.Res.(int64)), nil
+	case int32:
+		return float64(rr.Res.(int32)), nil
+	case string:
+		f, err := strconv.ParseFloat(rr.Res.(string), 64)
+		if err != nil {
+			return -1, err
+		}
+		return f, nil
+	}
+	return -1, errors.New("Result is not float64 format")
+}
+
 func (rr *redisResult) StringArray() ([]string, error) {
 	switch rr.Res.(type) {
 	case error:
