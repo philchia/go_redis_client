@@ -4,6 +4,7 @@ import (
 	"log"
 	"testing"
 
+	redis1 "github.com/garyburd/redigo/redis"
 	"github.com/philchia/go_redis_driver/redis"
 )
 
@@ -54,6 +55,21 @@ func TestMap(t *testing.T) {
 	log.Println(res)
 }
 
+func BenchmarkRedigo(b *testing.B) {
+	conn, err := redis1.Dial("tcp", "127.0.0.1:6379")
+	if err != nil {
+		b.Fail()
+	}
+	conn.Do("AUTH", "112919147")
+	for i := 0; i < b.N; i++ {
+		conn.Do("SET", "name", "chia")
+		_, err := redis1.String(conn.Do("GET", "name"))
+		if err != nil {
+			b.Fail()
+		}
+	}
+}
+
 func BenchmarkSetKey(b *testing.B) {
 	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
 	if err != nil {
@@ -63,10 +79,9 @@ func BenchmarkSetKey(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		conn.Exec("SET", "name", "chia")
-		res, err := conn.Exec("GET", "name").String()
+		_, err := conn.Exec("GET", "name").String()
 		if err != nil {
-			log.Println(err.Error())
+			b.Fail()
 		}
-		log.Println(res)
 	}
 }
