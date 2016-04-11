@@ -67,7 +67,7 @@ func (rr *redisResult) StringArray() ([]string, error) {
 	case []Result:
 		var arr []string
 		results := rr.Res.([]Result)
-		for i, r := range results {
+		for _, r := range results {
 			str, err := r.String()
 			if err != nil {
 				return nil, err
