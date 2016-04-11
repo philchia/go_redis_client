@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	con, err := redis.Connect("127.0.0.1:6379", "password")
+	con, err := redis.Connect("127.0.0.1:6379", "112919147")
 	if err != nil {
 		log.Fatal(err)
 	}

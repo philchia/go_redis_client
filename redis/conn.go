@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -23,18 +24,18 @@ func (c *connection) Close() error {
 // Exec do a single command
 func (c *connection) Exec(cmd string, args ...interface{}) Result {
 	res := new(redisResult)
-
+	c.QueueSize++
 	err := c.writeCmd(cmd, args...)
 	if err != nil {
 		res.Res = err
 		return res
 	}
+
 	err = c.flush()
 	if err != nil {
 		res.Res = err
 		return res
 	}
-	c.QueueSize = 1
 	return c.read()
 }
 
@@ -69,15 +70,9 @@ func (c *connection) flush() error {
 func (c *connection) read() Result {
 	size := c.QueueSize
 	c.QueueSize = 0
-	buf := make([]byte, 512)
-	n, err := c.Con.Read(buf)
-	if err != nil {
-		res := &redisResult{}
-		res.Res = err
-		return res
-	}
-	tmp := string(buf[:n])
-	return parseResults(tmp, size)
+	scanner := bufio.NewScanner(c.Con)
+
+	return parseResults(scanner, size)
 }
 
 func (c *connection) writeCmd(cmd string, args ...interface{}) (err error) {

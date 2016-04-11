@@ -4,14 +4,10 @@ import (
 	"bufio"
 	"errors"
 	"strconv"
-	"strings"
 )
 
-func parseResults(s string, n int) Result {
-	result := new(redisResult)
-	scanner := bufio.NewScanner(strings.NewReader(s))
+func parseResults(scanner *bufio.Scanner, n int) Result {
 	scanner.Split(bufio.ScanLines)
-
 	if n == 1 {
 		return parseResult(scanner)
 	}
@@ -19,8 +15,7 @@ func parseResults(s string, n int) Result {
 	for i := range lines {
 		lines[i] = parseResult(scanner)
 	}
-	result.Res = lines
-	return result
+	return lines[n-1]
 }
 
 func parseResult(scanner *bufio.Scanner) Result {

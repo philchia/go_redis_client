@@ -14,6 +14,8 @@ func (rr *redisResult) String() (string, error) {
 		return rr.Res.(string), nil
 	case []byte:
 		return string(rr.Res.([]byte)), nil
+	case Result:
+		return rr.Res.(Result).String()
 	}
 	return "", errors.New("Result is not string format")
 }
@@ -65,7 +67,7 @@ func (rr *redisResult) StringArray() ([]string, error) {
 	case []Result:
 		var arr []string
 		results := rr.Res.([]Result)
-		for _, r := range results {
+		for i, r := range results {
 			str, err := r.String()
 			if err != nil {
 				return nil, err
