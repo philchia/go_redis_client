@@ -81,7 +81,9 @@ func BenchmarkRedigo(b *testing.B) {
 	if err != nil {
 		b.Fail()
 	}
+	defer conn.Close()
 	conn.Do("AUTH", "112919147")
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		conn.Do("SET", "name", "chia")
 		_, err := redis1.String(conn.Do("GET", "name"))
@@ -97,6 +99,7 @@ func BenchmarkSetKey(b *testing.B) {
 		b.Fatal(err)
 	}
 	defer conn.Close()
+	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		conn.Exec("SET", "name", "chia")
