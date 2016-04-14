@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/philchia/go_redis_driver/redis"
+	"github.com/philchia/go_redis_client/redis"
 )
 
 func main() {

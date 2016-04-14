@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	redis1 "github.com/garyburd/redigo/redis"
-	"github.com/philchia/go_redis_driver/redis"
+	"github.com/philchia/go_redis_client/redis"
 )
 
 func TestSetGetString(t *testing.T) {
