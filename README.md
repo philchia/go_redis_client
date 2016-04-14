@@ -1,5 +1,5 @@
-# go_redis_driver
-go_redis_driver is a redis client for golang
+# go_redis_client
+go_redis_client is a redis client for golang
 
 # How to
 
