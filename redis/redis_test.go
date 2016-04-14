@@ -9,7 +9,12 @@ import (
 )
 
 func TestSetGetString(t *testing.T) {
-	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
+	opt := redis.Option{
+		Auth:         "112919147",
+		ReadTimeout:  1000000,
+		WriteTimeout: 1000000,
+	}
+	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -29,7 +34,12 @@ func TestSetGetString(t *testing.T) {
 
 func TestSetGetInt(t *testing.T) {
 
-	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
+	opt := redis.Option{
+		Auth:         "112919147",
+		ReadTimeout:  1000000,
+		WriteTimeout: 1000000,
+	}
+	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,7 +57,12 @@ func TestSetGetInt(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
+	opt := redis.Option{
+		Auth:         "112919147",
+		ReadTimeout:  1000000,
+		WriteTimeout: 1000000,
+	}
+	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +109,12 @@ func BenchmarkRedigo(b *testing.B) {
 }
 
 func BenchmarkSetKey(b *testing.B) {
-	conn, err := redis.Connect("127.0.0.1:6379", "112919147")
+	opt := redis.Option{
+		Auth:         "112919147",
+		ReadTimeout:  1000000,
+		WriteTimeout: 1000000,
+	}
+	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
 		b.Fatal(err)
 	}

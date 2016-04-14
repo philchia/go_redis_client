@@ -3,6 +3,7 @@ package redis
 import (
 	"bytes"
 	"net"
+	"time"
 )
 
 // Conn represent a connection
@@ -27,18 +28,26 @@ type Result interface {
 	Bool() (bool, error)
 }
 
+// Option handle the password and time out configuration
+type Option struct {
+	Auth         string
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+}
+
 // Connect generate a new Redis struct pointer
-func Connect(addr string, auth string) (Conn, error) {
+func Connect(addr string, option *Option) (Conn, error) {
 	tcpConn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 	conn := &connection{
-		Con: tcpConn,
-		Cmd: new(bytes.Buffer),
+		Con:  tcpConn,
+		Cmd:  new(bytes.Buffer),
+		Conf: option,
 	}
-	if len(auth) > 0 {
-		_, err := conn.Exec("AUTH", auth).String()
+	if option != nil && len(option.Auth) > 0 {
+		_, err := conn.Exec("AUTH", option.Auth).String()
 		if err != nil {
 			return nil, err
 		}

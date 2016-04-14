@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 	"unicode/utf8"
 )
 
@@ -14,6 +15,7 @@ type connection struct {
 	Con       net.Conn
 	Cmd       *bytes.Buffer
 	QueueSize int
+	Conf      *Option
 }
 
 // Close close the connection to redis server
@@ -25,6 +27,7 @@ func (c *connection) Close() error {
 func (c *connection) Exec(cmd string, args ...interface{}) Result {
 	res := new(redisResult)
 	c.QueueSize++
+
 	err := c.writeCmd(cmd, args...)
 	if err != nil {
 		res.Res = err
@@ -58,7 +61,9 @@ func (c *connection) Commit() Result {
 
 func (c *connection) flush() error {
 	defer c.clear()
-
+	if c.Conf != nil && c.Conf.WriteTimeout > 0 {
+		c.Con.SetWriteDeadline(time.Now().Add(c.Conf.WriteTimeout))
+	}
 	_, err := c.Con.Write(c.Cmd.Bytes())
 
 	if err != nil {
@@ -70,6 +75,9 @@ func (c *connection) flush() error {
 func (c *connection) read() Result {
 	size := c.QueueSize
 	c.QueueSize = 0
+	if c.Conf != nil && c.Conf.ReadTimeout > 0 {
+		c.Con.SetReadDeadline(time.Now().Add(c.Conf.WriteTimeout))
+	}
 	scanner := bufio.NewScanner(c.Con)
 
 	return parseResults(scanner, size)
