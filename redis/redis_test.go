@@ -116,9 +116,10 @@ func BenchmarkSetKey(b *testing.B) {
 	}
 	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
-		b.Fatal(err)
+		b.Fatalf("error while connection %v", err)
 	}
 	defer conn.Close()
+
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
