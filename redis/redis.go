@@ -37,7 +37,11 @@ type Option struct {
 
 // Connect generate a new Redis struct pointer
 func Connect(addr string, option *Option) (Conn, error) {
-	tcpConn, err := net.Dial("tcp", addr)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+	tcpConn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil {
 		return nil, err
 	}

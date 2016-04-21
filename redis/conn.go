@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 	"unicode/utf8"
 )
@@ -16,6 +17,7 @@ type connection struct {
 	Cmd       *bytes.Buffer
 	QueueSize int
 	Conf      *Option
+	Mx        sync.Mutex
 }
 
 // Close close the connection to redis server
@@ -25,18 +27,20 @@ func (c *connection) Close() error {
 
 // Exec do a single command
 func (c *connection) Exec(cmd string, args ...interface{}) Result {
+	c.Mx.Lock()
+	defer c.Mx.Unlock()
 	res := new(redisResult)
 	c.QueueSize++
 
 	err := c.writeCmd(cmd, args...)
 	if err != nil {
-		res.Res = err
+		res.Value = err
 		return res
 	}
 
 	err = c.flush()
 	if err != nil {
-		res.Res = err
+		res.Value = err
 		return res
 	}
 	return c.read()
@@ -44,6 +48,8 @@ func (c *connection) Exec(cmd string, args ...interface{}) Result {
 
 //Pipline cache all the command
 func (c *connection) Pipline(cmd string, args ...interface{}) error {
+	c.Mx.Lock()
+	defer c.Mx.Unlock()
 	if c.QueueSize == 0 {
 		err := c.writeCmd("MULTI")
 		if err != nil {

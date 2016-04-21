@@ -18,7 +18,7 @@ func parseResults(scanner *bufio.Scanner, n int) Result {
 	return lines[n-1]
 }
 
-func parseResult(scanner *bufio.Scanner) Result {
+func parseResult(scanner *bufio.Scanner) interface {
 	if scanner.Scan() {
 		str := scanner.Text()
 		switch str[:1] {
@@ -33,49 +33,49 @@ func parseResult(scanner *bufio.Scanner) Result {
 		case ":":
 			return parseInt(str)
 		default:
-			return &redisResult{Res: errors.New("Unknow response")}
+			return &redisResult{Value: errors.New("Unknow response")}
 		}
 	}
 	return nil
 }
 
-func parseResponse(str string) Result {
-	return &redisResult{Res: str[1:]}
+func parseResponse(str string) string {
+	return str[1:]
 }
 
-func parseError(str string) Result {
-	return &redisResult{Res: errors.New(str[1:])}
+func parseError(str string) error {
+	return errors.New(str[1:])
 }
 
-func parseStr(scanner *bufio.Scanner, str string) Result {
+func parseStr(scanner *bufio.Scanner, str string) string {
 	length := parseLength(str)
 	if length < 0 {
-		return nil
+		return ""
 	}
 	if scanner.Scan() {
 		nxStr := scanner.Text()
-		return &redisResult{Res: nxStr[:length]}
+		return nxStr[:length]
 	}
-	return nil
+	return ""
 }
 
-func parseArr(scanner *bufio.Scanner, str string) Result {
+func parseArr(scanner *bufio.Scanner, str string) []interface{} {
 	length := parseLength(str)
 	if length < 0 {
 		return nil
 	}
-	res := make([]Result, length)
+	res := make([]interface{}, length)
 	for i := range res {
 		res[i] = parseResult(scanner)
 
 	}
-	return &redisResult{Res: res}
+	return res
 }
 
-func parseInt(str string) Result {
+func parseInt(str string) int {
 	a := str[1:]
 	i, _ := strconv.Atoi(a)
-	return &redisResult{Res: i}
+	return i
 }
 
 func parseLength(s string) int {

@@ -6,47 +6,48 @@ import (
 )
 
 type redisResult struct {
-	Res interface{}
+	Value interface{}
+	Err   error
 }
 
 func (rr *redisResult) String() (string, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return "", rr.Res.(error)
+		return "", rr.Value.(error)
 	case string:
-		return rr.Res.(string), nil
+		return rr.Value.(string), nil
 	case []byte:
-		return string(rr.Res.([]byte)), nil
+		return string(rr.Value.([]byte)), nil
 	case Result:
-		return rr.Res.(Result).String()
+		return rr.Value.(Result).String()
 	}
 	return "", errors.New("Result is not string format")
 }
 
 func (rr *redisResult) Int() (int, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return -1, rr.Res.(error)
+		return -1, rr.Value.(error)
 	case int:
-		return rr.Res.(int), nil
+		return rr.Value.(int), nil
 	case string:
-		return strconv.Atoi(rr.Res.(string))
+		return strconv.Atoi(rr.Value.(string))
 	}
 	return -1, errors.New("Result is not int format")
 }
 
 func (rr *redisResult) Int32() (int32, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return -1, rr.Res.(error)
+		return -1, rr.Value.(error)
 	case int:
-		return int32(rr.Res.(int)), nil
+		return int32(rr.Value.(int)), nil
 	case int64:
-		return int32(rr.Res.(int64)), nil
+		return int32(rr.Value.(int64)), nil
 	case int32:
-		return rr.Res.(int32), nil
+		return rr.Value.(int32), nil
 	case string:
-		i, err := strconv.Atoi(rr.Res.(string))
+		i, err := strconv.Atoi(rr.Value.(string))
 		if err != nil {
 			return -1, err
 		}
@@ -56,17 +57,17 @@ func (rr *redisResult) Int32() (int32, error) {
 }
 
 func (rr *redisResult) Int64() (int64, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return -1, rr.Res.(error)
+		return -1, rr.Value.(error)
 	case int:
-		return int64(rr.Res.(int)), nil
+		return int64(rr.Value.(int)), nil
 	case int64:
-		return rr.Res.(int64), nil
+		return rr.Value.(int64), nil
 	case int32:
-		return int64(rr.Res.(int32)), nil
+		return int64(rr.Value.(int32)), nil
 	case string:
-		i, err := strconv.Atoi(rr.Res.(string))
+		i, err := strconv.Atoi(rr.Value.(string))
 		if err != nil {
 			return -1, err
 		}
@@ -76,17 +77,17 @@ func (rr *redisResult) Int64() (int64, error) {
 }
 
 func (rr *redisResult) Float32() (float32, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return -1, rr.Res.(error)
+		return -1, rr.Value.(error)
 	case int:
-		return float32(rr.Res.(int)), nil
+		return float32(rr.Value.(int)), nil
 	case int64:
-		return float32(rr.Res.(int64)), nil
+		return float32(rr.Value.(int64)), nil
 	case int32:
-		return float32(rr.Res.(int32)), nil
+		return float32(rr.Value.(int32)), nil
 	case string:
-		f, err := strconv.ParseFloat(rr.Res.(string), 32)
+		f, err := strconv.ParseFloat(rr.Value.(string), 32)
 		if err != nil {
 			return -1, err
 		}
@@ -96,17 +97,17 @@ func (rr *redisResult) Float32() (float32, error) {
 }
 
 func (rr *redisResult) Float64() (float64, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return -1, rr.Res.(error)
+		return -1, rr.Value.(error)
 	case int:
-		return float64(rr.Res.(int)), nil
+		return float64(rr.Value.(int)), nil
 	case int64:
-		return float64(rr.Res.(int64)), nil
+		return float64(rr.Value.(int64)), nil
 	case int32:
-		return float64(rr.Res.(int32)), nil
+		return float64(rr.Value.(int32)), nil
 	case string:
-		f, err := strconv.ParseFloat(rr.Res.(string), 64)
+		f, err := strconv.ParseFloat(rr.Value.(string), 64)
 		if err != nil {
 			return -1, err
 		}
@@ -116,14 +117,14 @@ func (rr *redisResult) Float64() (float64, error) {
 }
 
 func (rr *redisResult) StringArray() ([]string, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return nil, rr.Res.(error)
+		return nil, rr.Value.(error)
 	case []string:
-		return rr.Res.([]string), nil
+		return rr.Value.([]string), nil
 	case []Result:
 		var arr []string
-		results := rr.Res.([]Result)
+		results := rr.Value.([]Result)
 		for _, r := range results {
 			str, err := r.String()
 			if err != nil {
@@ -137,13 +138,13 @@ func (rr *redisResult) StringArray() ([]string, error) {
 }
 
 func (rr *redisResult) StringMap() (map[string]string, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case error:
-		return nil, rr.Res.(error)
+		return nil, rr.Value.(error)
 	case map[string]string:
-		return rr.Res.(map[string]string), nil
+		return rr.Value.(map[string]string), nil
 	case []Result:
-		results := rr.Res.([]Result)
+		results := rr.Value.([]Result)
 
 		length := len(results)
 		if length%2 != 0 {
@@ -168,19 +169,19 @@ func (rr *redisResult) StringMap() (map[string]string, error) {
 }
 
 func (rr *redisResult) Array() ([]Result, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case []Result:
-		return rr.Res.([]Result), nil
+		return rr.Value.([]Result), nil
 	}
 	return nil, errors.New("Result is not Array of result format")
 }
 
 func (rr *redisResult) Bool() (bool, error) {
-	switch rr.Res.(type) {
+	switch rr.Value.(type) {
 	case bool:
-		return rr.Res.(bool), nil
+		return rr.Value.(bool), nil
 	case int:
-		return rr.Res.(int) != 0, nil
+		return rr.Value.(int) != 0, nil
 	}
 	return false, errors.New("Result is not Array of result format")
 }
