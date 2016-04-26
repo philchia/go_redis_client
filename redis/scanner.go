@@ -3,7 +3,6 @@ package redis
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"strconv"
 )
 
@@ -30,7 +29,6 @@ func parseResults(scanner *bufio.Scanner, n int) Result {
 func parseResult(scanner *bufio.Scanner) interface{} {
 	if scanner.Scan() {
 		str := scanner.Text()
-		fmt.Println("scan text", str)
 		switch str[:1] {
 		case "+":
 			return parseResponse(str)
@@ -64,7 +62,6 @@ func parseStr(scanner *bufio.Scanner, length int) string {
 	}
 	if scanner.Scan() {
 		nxStr := scanner.Text()
-		fmt.Println("Scan str", nxStr)
 		return nxStr[:length]
 	}
 	return ""
