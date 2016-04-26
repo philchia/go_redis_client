@@ -59,9 +59,7 @@ func TestSetGetInt(t *testing.T) {
 
 func TestArr(t *testing.T) {
 	opt := redis.Option{
-		Auth:         "112919147",
-		ReadTimeout:  1000000,
-		WriteTimeout: 1000000,
+		Auth: "112919147",
 	}
 	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
