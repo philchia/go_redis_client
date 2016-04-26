@@ -3,7 +3,6 @@ package redis
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"strconv"
 )
 
@@ -13,7 +12,6 @@ type redisResult struct {
 }
 
 func (rr redisResult) String() (string, error) {
-	fmt.Println(reflect.TypeOf(rr.Value))
 	switch rr.Value.(type) {
 	case error:
 		return "", rr.Value.(error)
@@ -23,8 +21,6 @@ func (rr redisResult) String() (string, error) {
 		return string(rr.Value.([]byte)), nil
 	case interface{}:
 		return fmt.Sprint(rr.Value.(interface{})), nil
-	case redisResult:
-		return rr.Value.(redisResult).String()
 	}
 	return "", errors.New("Result is not string format")
 }
@@ -227,6 +223,8 @@ func (rr redisResult) Bool() (bool, error) {
 		return rr.Value.(bool), nil
 	case int:
 		return rr.Value.(int) != 0, nil
+	case string:
+		return rr.Value.(string) == "OK", nil
 	}
 	return false, errors.New("Result is not Array of result format")
 }
