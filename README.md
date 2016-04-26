@@ -7,7 +7,7 @@ go_redis_client is a redis client for golang
 
 ```go
 	opt := redis.Option{
-		Auth: "112919147",
+		Auth: "password",
 	}
 	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
@@ -32,7 +32,7 @@ go_redis_client is a redis client for golang
 
 ```go
 	opt := redis.Option{
-		Auth: "112919147",
+		Auth: "password",
 	}
 	conn, err := redis.Connect("127.0.0.1:6379", &opt)
 	if err != nil {
