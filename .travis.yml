@@ -10,6 +10,13 @@ go:
   - 1.7
   - tip
 
-script:
+matrix:
+  allow_failures:
+    - go: tip
+
+install:
   - go get -v github.com/garyburd/redigo/redis
-  - go test -v -race ./...
+  - go get github.com/mattn/goveralls
+
+script:
+  - $HOME/gopath/bin/goveralls -service=travis-ci -repotoken $COVERALLS_TOKEN
