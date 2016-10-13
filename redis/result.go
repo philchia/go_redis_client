@@ -11,14 +11,41 @@ type redisResult struct {
 	Err   error
 }
 
+func (rr redisResult) Error() error {
+	if rr.Err != nil {
+		return rr.Err
+	}
+	return nil
+}
+
+func (rr redisResult) OK() bool {
+	return rr.Value == OK
+}
+
+func (rr redisResult) PONG() bool {
+	return rr.Value == PONG
+}
+
 func (rr redisResult) String() (string, error) {
-	switch rr.Value.(type) {
+	switch val := rr.Value.(type) {
 	case error:
 		return "", rr.Value.(error)
 	case string:
-		return rr.Value.(string), nil
+		return val, nil
 	case []byte:
-		return string(rr.Value.([]byte)), nil
+		return string(val), nil
+	case int8:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int16:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int32:
+		return strconv.FormatInt(int64(val), 10), nil
+	case int64:
+		return strconv.FormatInt(val, 10), nil
+	case float64:
+		return strconv.FormatFloat(val, 'g', -1, 64), nil
 	case interface{}:
 		return fmt.Sprint(rr.Value.(interface{})), nil
 	}
@@ -26,75 +53,17 @@ func (rr redisResult) String() (string, error) {
 }
 
 func (rr redisResult) Int() (int, error) {
-	switch rr.Value.(type) {
+	switch val := rr.Value.(type) {
 	case error:
-		return -1, rr.Value.(error)
+		return -1, val
 	case int:
-		return rr.Value.(int), nil
+		return val, nil
+	case int64:
+		return int(val), nil
 	case string:
 		return strconv.Atoi(rr.Value.(string))
 	}
 	return -1, errors.New("Result is not int format")
-}
-
-func (rr redisResult) Int32() (int32, error) {
-	switch rr.Value.(type) {
-	case error:
-		return -1, rr.Value.(error)
-	case int:
-		return int32(rr.Value.(int)), nil
-	case int64:
-		return int32(rr.Value.(int64)), nil
-	case int32:
-		return rr.Value.(int32), nil
-	case string:
-		i, err := strconv.Atoi(rr.Value.(string))
-		if err != nil {
-			return -1, err
-		}
-		return int32(i), nil
-	}
-	return -1, errors.New("Result is not int32 format")
-}
-
-func (rr redisResult) Int64() (int64, error) {
-	switch rr.Value.(type) {
-	case error:
-		return -1, rr.Value.(error)
-	case int:
-		return int64(rr.Value.(int)), nil
-	case int64:
-		return rr.Value.(int64), nil
-	case int32:
-		return int64(rr.Value.(int32)), nil
-	case string:
-		i, err := strconv.Atoi(rr.Value.(string))
-		if err != nil {
-			return -1, err
-		}
-		return int64(i), nil
-	}
-	return -1, errors.New("Result is not int64 format")
-}
-
-func (rr redisResult) Float32() (float32, error) {
-	switch rr.Value.(type) {
-	case error:
-		return -1, rr.Value.(error)
-	case int:
-		return float32(rr.Value.(int)), nil
-	case int64:
-		return float32(rr.Value.(int64)), nil
-	case int32:
-		return float32(rr.Value.(int32)), nil
-	case string:
-		f, err := strconv.ParseFloat(rr.Value.(string), 32)
-		if err != nil {
-			return -1, err
-		}
-		return float32(f), nil
-	}
-	return -1, errors.New("Result is not float32 format")
 }
 
 func (rr redisResult) Float64() (float64, error) {
@@ -117,7 +86,7 @@ func (rr redisResult) Float64() (float64, error) {
 	return -1, errors.New("Result is not float64 format")
 }
 
-func (rr redisResult) StringArray() ([]string, error) {
+func (rr redisResult) Strings() ([]string, error) {
 	switch rr.Value.(type) {
 	case error:
 		return nil, rr.Value.(error)
@@ -209,7 +178,7 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 	return nil, errors.New("Result is not string map format")
 }
 
-func (rr redisResult) Array() ([]Result, error) {
+func (rr redisResult) Results() ([]Result, error) {
 	switch rr.Value.(type) {
 	case []Result:
 		return rr.Value.([]Result), nil

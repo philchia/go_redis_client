@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"bytes"
+	"bufio"
 	"net"
 	"time"
 )
@@ -16,15 +16,15 @@ type Conn interface {
 
 // Result interface
 type Result interface {
+	Error() error
+	OK() bool
+	PONG() bool
 	String() (string, error)
-	StringArray() ([]string, error)
+	Strings() ([]string, error)
 	StringMap() (map[string]string, error)
 	Int() (int, error)
-	Int32() (int32, error)
-	Int64() (int64, error)
-	Float32() (float32, error)
 	Float64() (float64, error)
-	Array() ([]Result, error)
+	Results() ([]Result, error)
 	Bool() (bool, error)
 }
 
@@ -47,14 +47,13 @@ func Connect(addr string, option *Option) (Conn, error) {
 	}
 	conn := &connection{
 		Con:  tcpConn,
-		Cmd:  new(bytes.Buffer),
+		BW:   bufio.NewWriter(tcpConn),
+		BR:   bufio.NewReader(tcpConn),
 		Conf: option,
+		Crlf: []byte{'\r', '\n'},
 	}
 	if option != nil && len(option.Auth) > 0 {
-		_, err := conn.Exec("AUTH", option.Auth).String()
-		if err != nil {
-			return nil, err
-		}
+		conn.Exec("AUTH", option.Auth)
 	}
 	return conn, nil
 }
