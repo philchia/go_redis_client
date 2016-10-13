@@ -9,10 +9,7 @@ import (
 )
 
 func TestSetGetString(t *testing.T) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,11 +28,7 @@ func TestSetGetString(t *testing.T) {
 }
 
 func TestSetGetInt(t *testing.T) {
-
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,10 +47,7 @@ func TestSetGetInt(t *testing.T) {
 }
 
 func TestArr(t *testing.T) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,10 +71,7 @@ func TestArr(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,10 +110,7 @@ func BenchmarkRedigoGetKey(b *testing.B) {
 }
 
 func BenchmarkGetKey(b *testing.B) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		b.Fatalf("error while connection %v", err)
 	}
@@ -152,10 +136,7 @@ func BenchmarkRedigoGetIntKey(b *testing.B) {
 }
 
 func BenchmarkGetIntKey(b *testing.B) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		b.Fatalf("error while connection %v", err)
 	}
@@ -182,10 +163,7 @@ func BenchmarkRedigoSetKey(b *testing.B) {
 }
 
 func BenchmarkSetKey(b *testing.B) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		b.Fatalf("error while connection %v", err)
 	}
@@ -210,10 +188,8 @@ func BenchmarkRedigoPing(b *testing.B) {
 }
 
 func BenchmarkPing(b *testing.B) {
-	opt := redis.Option{
-		Auth: "112919147",
-	}
-	conn, err := redis.Connect("127.0.0.1:6379", &opt)
+
+	conn, err := redis.Connect("127.0.0.1", "6379")
 	if err != nil {
 		b.Fatal(err)
 	}

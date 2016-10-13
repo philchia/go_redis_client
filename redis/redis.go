@@ -36,8 +36,8 @@ type Option struct {
 }
 
 // Connect generate a new Redis struct pointer
-func Connect(addr string, option *Option) (Conn, error) {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
+func Connect(host, port string, options ...*Option) (Conn, error) {
+	tcpAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
 	if err != nil {
 		return nil, err
 	}
@@ -45,15 +45,18 @@ func Connect(addr string, option *Option) (Conn, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	conn := &connection{
 		Con:  tcpConn,
 		BW:   bufio.NewWriter(tcpConn),
 		BR:   bufio.NewReader(tcpConn),
-		Conf: option,
 		Crlf: []byte{'\r', '\n'},
 	}
-	if option != nil && len(option.Auth) > 0 {
-		conn.Exec("AUTH", option.Auth)
+	if len(options) > 0 {
+		conn.Conf = options[0]
+	}
+	if conn.Conf != nil && len(conn.Conf.Auth) > 0 {
+		conn.Exec("AUTH", conn.Conf.Auth)
 	}
 	return conn, nil
 }
