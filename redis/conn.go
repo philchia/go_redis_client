@@ -48,12 +48,12 @@ func (c *connection) Exec(cmd string, args ...interface{}) Result {
 
 	err := c.writeCmd(cmd, args...)
 	if err != nil {
-		return nil
+		return redisResult{Err: err}
 	}
 
-	_ = c.flush()
+	err = c.flush()
 	if err != nil {
-		return nil
+		return redisResult{Err: err}
 	}
 	return c.read(cmd)
 }
@@ -201,41 +201,44 @@ func (c *connection) writeCmd(cmd string, args ...interface{}) (err error) {
 	c.writeLen('*', len(args)+1)
 	c.writeString(cmd)
 	for _, arg := range args {
-		c.writeAny(arg)
+		err = c.writeAny(arg)
+		if err != nil {
+			return err
+		}
 	}
 	return
 }
 
-func (c *connection) writeAny(cmd interface{}) {
+func (c *connection) writeAny(cmd interface{}) error {
 	switch val := cmd.(type) {
 	case string:
-		c.writeString(val)
+		return c.writeString(val)
 	case int8:
-		c.writeInt64(int64(val))
+		return c.writeInt64(int64(val))
 	case int16:
-		c.writeInt64(int64(val))
+		return c.writeInt64(int64(val))
 	case int32:
-		c.writeInt64(int64(val))
+		return c.writeInt64(int64(val))
 	case int64:
-		c.writeInt64(val)
+		return c.writeInt64(val)
 	case int:
-		c.writeInt64(int64(val))
+		return c.writeInt64(int64(val))
 	case []byte:
-		c.writeBytes(val)
+		return c.writeBytes(val)
 	case float32:
-		c.writeFloat64(float64(val))
+		return c.writeFloat64(float64(val))
 	case float64:
-		c.writeFloat64(val)
+		return c.writeFloat64(val)
 	case bool:
-		c.writeBool(val)
+		return c.writeBool(val)
 	case nil:
-		c.writeNil()
+		return c.writeNil()
 	default:
-		panic(errors.New("unknow type"))
+		return errors.New("unknow type")
 	}
 }
 
-func (c *connection) writeLen(pre byte, length int) {
+func (c *connection) writeLen(pre byte, length int) error {
 	i := cap(c.Draft)
 	c.Draft[i-1] = '\n'
 	c.Draft[i-2] = '\r'
@@ -250,45 +253,42 @@ func (c *connection) writeLen(pre byte, length int) {
 			break
 		}
 	}
-	c.BW.Write(c.Draft[i:])
+	_, err := c.BW.Write(c.Draft[i:])
+	return err
 }
 
-func (c *connection) writeCrlf() {
-	c.BW.Write(c.Crlf)
+func (c *connection) writeCrlf() error {
+	_, err := c.BW.Write(c.Crlf)
+	return err
 }
 
-func (c *connection) writeString(s string) {
+func (c *connection) writeString(s string) error {
 	c.writeLen('$', len(s))
 	c.BW.WriteString(s)
-	c.writeCrlf()
+	return c.writeCrlf()
 }
 
-func (c *connection) writeBytes(bts []byte) {
+func (c *connection) writeBytes(bts []byte) error {
 	c.writeLen('$', len(bts))
 	c.BW.Write(bts)
-	c.writeCrlf()
+	return c.writeCrlf()
 }
 
-func (c *connection) writeInt64(i int64) {
-	c.writeBytes(strconv.AppendInt(c.Draft[:0], i, 10))
+func (c *connection) writeInt64(i int64) error {
+	return c.writeBytes(strconv.AppendInt(c.Draft[:0], i, 10))
 }
 
-func (c *connection) writeFloat64(f float64) {
-	c.writeBytes(strconv.AppendFloat(c.Draft[:0], f, 'g', -1, 64))
+func (c *connection) writeFloat64(f float64) error {
+	return c.writeBytes(strconv.AppendFloat(c.Draft[:0], f, 'g', -1, 64))
 }
 
-func (c *connection) writeBool(b bool) {
+func (c *connection) writeBool(b bool) error {
 	if b {
-		c.writeInt64(1)
-	} else {
-		c.writeInt64(0)
+		return c.writeInt64(1)
 	}
+	return c.writeInt64(0)
 }
 
-func (c *connection) writeNil() {
-	c.writeString("")
-}
-
-func (c *connection) clear() {
-	c.BW.Reset(c.Con)
+func (c *connection) writeNil() error {
+	return c.writeString("")
 }
