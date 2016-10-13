@@ -1,6 +1,8 @@
 # go_redis_client
 go_redis_client is a redis client for golang
 
+[![Build Status](https://travis-ci.org/philchia/go_redis_client.svg?branch=master)](https://travis-ci.org/philchia/go_redis_client)
+
 # How to
 
 ## Single command
