@@ -16,7 +16,7 @@ matrix:
 
 install:
   - go get -v github.com/garyburd/redigo/redis
-  - go get github.com/zieckey/golang.org/tree/master/x/tools/cmd/cover
+  - go get github.com/zieckey/golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
 script:
