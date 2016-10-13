@@ -16,9 +16,7 @@ matrix:
 
 install:
   - go get -v github.com/garyburd/redigo/redis
-  - go get github.com/zieckey/golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
 
 script:
-  - go test -v -covermode=count -coverprofile=coverage.out
-  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - $HOME/gopath/bin/goveralls -service=travis-ci -repotoken $COVERALLS_TOKEN
