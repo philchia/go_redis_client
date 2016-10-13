@@ -10,6 +10,15 @@ go:
   - 1.7
   - tip
 
-script:
+matrix:
+  allow_failures:
+    - go: tip
+
+install:
   - go get -v github.com/garyburd/redigo/redis
-  - go test -v -race ./...
+  - go get github.com/zieckey/golang.org/tree/master/x/tools/cover
+  - go get github.com/mattn/goveralls
+
+script:
+  - go test -v -covermode=count -coverprofile=coverage.out
+  - $HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
