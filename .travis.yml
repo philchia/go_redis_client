@@ -11,4 +11,5 @@ go:
   - tip
 
 script:
+  - go get -v github.com/garyburd/redigo/redis
   - go test -v -race ./...
