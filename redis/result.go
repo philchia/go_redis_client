@@ -56,28 +56,37 @@ func (rr redisResult) Int() (int, error) {
 	switch val := rr.Value.(type) {
 	case error:
 		return -1, val
+	case int8:
+		return int(val), nil
+	case int16:
+		return int(val), nil
 	case int:
 		return val, nil
+	case int32:
+		return int(val), nil
 	case int64:
 		return int(val), nil
 	case string:
-		return strconv.Atoi(rr.Value.(string))
+		return strconv.Atoi(val)
+	case []byte:
+		return strconv.Atoi(string(val))
+
 	}
 	return -1, errors.New("Result is not int format")
 }
 
 func (rr redisResult) Float64() (float64, error) {
-	switch rr.Value.(type) {
+	switch val := rr.Value.(type) {
 	case error:
-		return -1, rr.Value.(error)
+		return -1, val
 	case int:
-		return float64(rr.Value.(int)), nil
+		return float64(val), nil
 	case int64:
-		return float64(rr.Value.(int64)), nil
+		return float64(val), nil
 	case int32:
-		return float64(rr.Value.(int32)), nil
+		return float64(val), nil
 	case string:
-		f, err := strconv.ParseFloat(rr.Value.(string), 64)
+		f, err := strconv.ParseFloat(val, 64)
 		if err != nil {
 			return -1, err
 		}
@@ -187,13 +196,11 @@ func (rr redisResult) Results() ([]Result, error) {
 }
 
 func (rr redisResult) Bool() (bool, error) {
-	switch rr.Value.(type) {
+	switch val := rr.Value.(type) {
 	case bool:
-		return rr.Value.(bool), nil
+		return val, nil
 	case int:
-		return rr.Value.(int) != 0, nil
-	case string:
-		return rr.Value.(string) == "OK", nil
+		return val != 0, nil
 	}
 	return false, errors.New("Result is not Array of result format")
 }
