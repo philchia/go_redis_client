@@ -59,6 +59,12 @@ go_redis_client is a redis client for golang
 		log.Fatal(err)
 	}
 
+	strs, err := con.Exec("GET", "name", "gender").Strings()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(strs)
+
 ```
 
 #Todo
