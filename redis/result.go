@@ -6,6 +6,10 @@ import (
 	"strconv"
 )
 
+var (
+	errResultFormatMismatch = errors.New("format mismatch")
+)
+
 type redisResult struct {
 	Value interface{}
 	Err   error
@@ -46,7 +50,7 @@ func (rr redisResult) String() (string, error) {
 	case interface{}:
 		return fmt.Sprint(rr.Value.(interface{})), nil
 	}
-	return "", errors.New("Result is not string format")
+	return "", errResultFormatMismatch
 }
 
 func (rr redisResult) Int() (int, error) {
@@ -69,7 +73,7 @@ func (rr redisResult) Int() (int, error) {
 		return strconv.Atoi(string(val))
 
 	}
-	return -1, errors.New("Result is not int format")
+	return -1, errResultFormatMismatch
 }
 
 func (rr redisResult) Float64() (float64, error) {
@@ -89,7 +93,7 @@ func (rr redisResult) Float64() (float64, error) {
 		}
 		return f, nil
 	}
-	return -1, errors.New("Result is not float64 format")
+	return -1, errResultFormatMismatch
 }
 
 func (rr redisResult) Strings() ([]string, error) {
@@ -119,7 +123,7 @@ func (rr redisResult) Strings() ([]string, error) {
 		return arr, nil
 	}
 
-	return nil, errors.New("Result is not string array format")
+	return nil, errResultFormatMismatch
 }
 
 func (rr redisResult) StringMap() (map[string]string, error) {
@@ -132,7 +136,7 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 
 		length := len(r)
 		if length%2 != 0 {
-			return nil, errors.New("Result is not a string map format")
+			return nil, errResultFormatMismatch
 		}
 		m := make(map[string]string)
 		for i := 0; i < length; i++ {
@@ -167,7 +171,7 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 
 		m := make(map[string]string)
 		if len(r)%2 != 0 {
-			return nil, errors.New("Result is not string map format")
+			return nil, errResultFormatMismatch
 		}
 		for i := 0; i < len(r); i++ {
 			k := fmt.Sprint(r[i])
@@ -178,7 +182,7 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 		return m, nil
 	}
 
-	return nil, errors.New("Result is not string map format")
+	return nil, errResultFormatMismatch
 }
 
 func (rr redisResult) Results() ([]Result, error) {
@@ -186,7 +190,7 @@ func (rr redisResult) Results() ([]Result, error) {
 	case []Result:
 		return r, nil
 	}
-	return nil, errors.New("Result is not Array of result format")
+	return nil, errResultFormatMismatch
 }
 
 func (rr redisResult) Bool() (bool, error) {
@@ -196,5 +200,5 @@ func (rr redisResult) Bool() (bool, error) {
 	case int:
 		return val != 0, nil
 	}
-	return false, errors.New("Result is not Array of result format")
+	return false, errResultFormatMismatch
 }
