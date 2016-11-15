@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	// CMDExec represent the exec command
 	CMDExec = "EXEC"
 )
 
