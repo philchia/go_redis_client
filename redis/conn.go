@@ -16,10 +16,14 @@ const (
 )
 
 var (
-	ErrBufferFull     = errors.New("too long response")
+	// ErrBufferFull ...
+	ErrBufferFull = errors.New("too long response")
+	// ErrResponseFormat ...
 	ErrResponseFormat = errors.New("response format wrong")
-	OK                = redisResult{Value: "OK"}
-	PONG              = redisResult{Value: "PONG"}
+	// OK represent response "OK"
+	OK = redisResult{Value: "OK"}
+	// PONG represent response "PONG"
+	PONG = redisResult{Value: "PONG"}
 )
 
 // connection ...
