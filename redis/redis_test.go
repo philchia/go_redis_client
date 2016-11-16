@@ -101,7 +101,6 @@ func BenchmarkRedigoGetKey(b *testing.B) {
 		b.Fail()
 	}
 	defer conn.Close()
-	conn.Do("AUTH", "112919147")
 	conn.Do("SET", "name", "chia")
 
 	for i := 0; i < b.N; i++ {
@@ -115,6 +114,7 @@ func BenchmarkGetKey(b *testing.B) {
 		b.Fatalf("error while connection %v", err)
 	}
 	defer conn.Close()
+	conn.Exec("SET", "name", "phil")
 
 	for i := 0; i < b.N; i++ {
 		conn.Exec("GET", "name").String()
@@ -127,7 +127,6 @@ func BenchmarkRedigoGetIntKey(b *testing.B) {
 		b.Fail()
 	}
 	defer conn.Close()
-	conn.Do("AUTH", "112919147")
 	conn.Do("SET", 1, "one")
 
 	for i := 0; i < b.N; i++ {
@@ -155,7 +154,6 @@ func BenchmarkRedigoSetKey(b *testing.B) {
 		b.Fail()
 	}
 	defer conn.Close()
-	conn.Do("AUTH", "112919147")
 
 	for i := 0; i < b.N; i++ {
 		conn.Do("SET", "name", "chia")
@@ -170,7 +168,7 @@ func BenchmarkSetKey(b *testing.B) {
 	defer conn.Close()
 
 	for i := 0; i < b.N; i++ {
-		conn.Exec("SET", "name", "chia").OK()
+		conn.Exec("SET", "name", "chia")
 	}
 }
 
@@ -180,7 +178,6 @@ func BenchmarkRedigoPing(b *testing.B) {
 		b.Fail()
 	}
 	defer conn.Close()
-	conn.Do("AUTH", "112919147")
 
 	for i := 0; i < b.N; i++ {
 		conn.Do("PING")
@@ -196,6 +193,6 @@ func BenchmarkPing(b *testing.B) {
 	defer conn.Close()
 
 	for i := 0; i < b.N; i++ {
-		conn.Exec("PING").PONG()
+		conn.Exec("PING")
 	}
 }
