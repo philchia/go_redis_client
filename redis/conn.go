@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -51,13 +50,11 @@ func (c *connection) Exec(cmd string, args ...interface{}) Result {
 
 	c.QueueSize++
 
-	err := c.writeCmd(cmd, args...)
-	if err != nil {
+	if err := c.writeCmd(cmd, args...); err != nil {
 		return redisResult{Err: err}
 	}
 
-	err = c.flush()
-	if err != nil {
+	if err := c.flush(); err != nil {
 		return redisResult{Err: err}
 	}
 	return c.read(cmd)
@@ -68,8 +65,7 @@ func (c *connection) Pipline(cmd string, args ...interface{}) error {
 	c.Mx.Lock()
 	defer c.Mx.Unlock()
 	if c.QueueSize == 0 {
-		err := c.writeCmd("MULTI")
-		if err != nil {
+		if err := c.writeCmd("MULTI"); err != nil {
 			return err
 		}
 		c.QueueSize++
@@ -96,11 +92,10 @@ func (c *connection) read(cmd string) Result {
 		c.Con.SetReadDeadline(time.Now().Add(c.Conf.WriteTimeout))
 	}
 
-	if strings.ToUpper(cmd) == CMDExec {
+	if size > 1 {
 		res := make([]Result, size)
 		for i := range res {
-			r := c.readReply()
-			res[i] = r
+			res[i] = c.readReply()
 		}
 		return redisResult{Value: res}
 	}
@@ -123,11 +118,11 @@ func (c *connection) readReply() Result {
 		case len(bts) == 5 && bts[1] == 'P' && bts[2] == 'O' && bts[3] == 'O' && bts[4] == 'G':
 			return PONG
 		default:
-			return redisResult{Value: string(bts[1:])}
+			return redisResult{Value: bytes2str(bts[1:])}
 		}
 
 	case '-':
-		return redisResult{Err: errors.New(string(bts[1:]))}
+		return redisResult{Err: errors.New(bytes2str(bts[1:]))}
 
 	case ':':
 		res, err := parseInt(bts[1:])
@@ -141,7 +136,7 @@ func (c *connection) readReply() Result {
 		if err != nil {
 			return redisResult{Err: err}
 		}
-		return redisResult{Value: string(line)}
+		return redisResult{Value: bytes2str(line)}
 	case '*':
 		count, err := parseInt(bts[1:])
 		if err != nil {
