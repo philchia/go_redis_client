@@ -34,7 +34,7 @@ func (rr redisResult) String() (string, error) {
 	case string:
 		return val, nil
 	case []byte:
-		return string(val), nil
+		return bytes2str(val), nil
 	case int8:
 		return strconv.FormatInt(int64(val), 10), nil
 	case int16:
@@ -48,7 +48,7 @@ func (rr redisResult) String() (string, error) {
 	case float64:
 		return strconv.FormatFloat(val, 'g', -1, 64), nil
 	case interface{}:
-		return fmt.Sprint(rr.Value.(interface{})), nil
+		return fmt.Sprint(val), nil
 	}
 	return "", errResultFormatMismatch
 }
@@ -70,8 +70,7 @@ func (rr redisResult) Int() (int, error) {
 	case string:
 		return strconv.Atoi(val)
 	case []byte:
-		return strconv.Atoi(string(val))
-
+		return strconv.Atoi(bytes2str(val))
 	}
 	return -1, errResultFormatMismatch
 }
@@ -129,11 +128,12 @@ func (rr redisResult) Strings() ([]string, error) {
 func (rr redisResult) StringMap() (map[string]string, error) {
 	switch r := rr.Value.(type) {
 	case error:
-		return nil, rr.Value.(error)
+		return nil, r
+
 	case map[string]string:
 		return r, nil
-	case []Result:
 
+	case []Result:
 		length := len(r)
 		if length%2 != 0 {
 			return nil, errResultFormatMismatch
@@ -154,21 +154,17 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 		return m, nil
 
 	case []string:
-
 		length := len(r)
-
 		m := make(map[string]string)
 		for i := 0; i < length; i++ {
 			k := r[i]
-
 			i++
-
 			v := r[i]
 			m[k] = v
 		}
 		return m, nil
-	case []interface{}:
 
+	case []interface{}:
 		m := make(map[string]string)
 		if len(r)%2 != 0 {
 			return nil, errResultFormatMismatch
