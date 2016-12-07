@@ -6,28 +6,6 @@ import (
 	"time"
 )
 
-// Conn represent a connection
-type Conn interface {
-	Exec(cmd string, args ...interface{}) (res Result)
-	Close() error
-	Pipline(cmd string, args ...interface{}) error
-	Commit() (res Result)
-}
-
-// Result interface
-type Result interface {
-	Error() error
-	OK() bool
-	PONG() bool
-	String() (string, error)
-	Strings() ([]string, error)
-	StringMap() (map[string]string, error)
-	Int() (int, error)
-	Float64() (float64, error)
-	Results() ([]Result, error)
-	Bool() (bool, error)
-}
-
 // Option handle the password and time out configuration
 type Option struct {
 	Auth         string

@@ -16,14 +16,23 @@ const (
 
 var (
 	// ErrBufferFull ...
-	ErrBufferFull = errors.New("too long response")
+	ErrBufferFull = errors.New("response too long")
 	// ErrResponseFormat ...
-	ErrResponseFormat = errors.New("response format wrong")
+	ErrResponseFormat = errors.New("incorrect response format")
 	// OK represent response "OK"
-	OK = redisResult{Value: "OK"}
+	OK = &redisResult{Value: "OK"}
 	// PONG represent response "PONG"
-	PONG = redisResult{Value: "PONG"}
+	PONG = &redisResult{Value: "PONG"}
 )
+
+// Conn represent a connection
+type Conn interface {
+	Exec(cmd string, args ...interface{}) (res Result)
+	Close() error
+	Pipline(cmd string, args ...interface{}) error
+	Commit() (res Result)
+	read() Result
+}
 
 // connection ...
 type connection struct {
@@ -51,13 +60,13 @@ func (c *connection) Exec(cmd string, args ...interface{}) Result {
 	c.QueueSize++
 
 	if err := c.writeCmd(cmd, args...); err != nil {
-		return redisResult{Err: err}
+		return &redisResult{Value: err}
 	}
 
 	if err := c.flush(); err != nil {
-		return redisResult{Err: err}
+		return &redisResult{Value: err}
 	}
-	return c.read(cmd)
+	return c.read()
 }
 
 //Pipline cache all the command
@@ -85,7 +94,7 @@ func (c *connection) flush() error {
 	return c.BW.Flush()
 }
 
-func (c *connection) read(cmd string) Result {
+func (c *connection) read() Result {
 	size := c.QueueSize
 	c.QueueSize = 0
 	if c.Conf != nil && c.Conf.ReadTimeout > 0 {
@@ -97,7 +106,7 @@ func (c *connection) read(cmd string) Result {
 		for i := range res {
 			res[i] = c.readReply()
 		}
-		return redisResult{Value: res}
+		return &redisResult{Value: res}
 	}
 
 	return c.readReply()
@@ -106,7 +115,7 @@ func (c *connection) read(cmd string) Result {
 func (c *connection) readReply() Result {
 	bts, err := c.readLine()
 	if err != nil {
-		return redisResult{Err: err}
+		return &redisResult{Value: err}
 	}
 
 	switch bts[0] {
@@ -118,37 +127,37 @@ func (c *connection) readReply() Result {
 		case len(bts) == 5 && bts[1] == 'P' && bts[2] == 'O' && bts[3] == 'O' && bts[4] == 'G':
 			return PONG
 		default:
-			return redisResult{Value: bytes2str(bts[1:])}
+			return &redisResult{Value: bytes2str(bts[1:])}
 		}
 
 	case '-':
-		return redisResult{Err: errors.New(bytes2str(bts[1:]))}
+		return &redisResult{Value: errors.New(bytes2str(bts[1:]))}
 
 	case ':':
 		res, err := parseInt(bts[1:])
 		if err != nil {
-			return redisResult{Err: err}
+			return &redisResult{Value: err}
 		}
-		return redisResult{Value: res}
+		return &redisResult{Value: res}
 
 	case '$':
 		line, err := c.readLine()
 		if err != nil {
-			return redisResult{Err: err}
+			return &redisResult{Value: err}
 		}
-		return redisResult{Value: bytes2str(line)}
+		return &redisResult{Value: bytes2str(line)}
 	case '*':
 		count, err := parseInt(bts[1:])
 		if err != nil {
-			return redisResult{Err: err}
+			return &redisResult{Value: err}
 		}
 		res := make([]Result, count)
 		for i := range res {
 			res[i] = c.readReply()
 		}
-		return redisResult{Value: res}
+		return &redisResult{Value: res}
 	}
-	return redisResult{Err: errors.New("unexpected response line")}
+	return &redisResult{Value: errors.New("unexpected response line")}
 }
 
 // parseInt parses an integer reply.

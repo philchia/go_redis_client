@@ -1,18 +1,19 @@
 language: go
+
 sudo: false
+
 services:
   - redis-server
 
 go:
-  - 1.4
-  - 1.5
-  - 1.6
   - 1.7
-  - tip
+  - master
 
 install:
   - go get -u github.com/garyburd/redigo/redis
   - go get -u github.com/mattn/goveralls
 
 script:
+  - GOMAXPROCS=1 go test -timeout 30s ./...
+  - GOMAXPROCS=4 go test -timeout 30s -race ./...
   - $HOME/gopath/bin/goveralls -service=travis-ci -repotoken $COVERALLS_TOKEN
