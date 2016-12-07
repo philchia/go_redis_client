@@ -26,6 +26,24 @@ type Result interface {
 	Message() (Message, error)
 }
 
+// Message received from subscribe
+type Message struct {
+	// Message type message/subscribe/unsubscribe/psubscribe/punsubscribe
+	Type string
+
+	// The pattern mathced
+	Pattern string
+
+	// The originating channel.
+	Channel string
+
+	// The data
+	Data interface{}
+
+	// The subscribe count
+	Count int
+}
+
 type redisResult struct {
 	Value interface{}
 }
