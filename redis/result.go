@@ -3,6 +3,7 @@ package redis
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
@@ -10,27 +11,44 @@ var (
 	errResultFormatMismatch = errors.New("format mismatch")
 )
 
+// Result interface
+type Result interface {
+	Error() error
+	OK() bool
+	PONG() bool
+	String() (string, error)
+	Strings() ([]string, error)
+	StringMap() (map[string]string, error)
+	Int() (int, error)
+	Float64() (float64, error)
+	Results() ([]Result, error)
+	Bool() (bool, error)
+	Message() (Message, error)
+}
+
 type redisResult struct {
 	Value interface{}
-	Err   error
 }
 
-func (rr redisResult) Error() error {
-	return rr.Err
+func (rr *redisResult) Error() error {
+	if err, ok := rr.Value.(error); ok {
+		return err
+	}
+	return nil
 }
 
-func (rr redisResult) OK() bool {
-	return rr.Value == OK
+func (rr *redisResult) OK() bool {
+	return reflect.DeepEqual(rr, OK)
 }
 
-func (rr redisResult) PONG() bool {
-	return rr.Value == PONG
+func (rr *redisResult) PONG() bool {
+	return reflect.DeepEqual(rr, PONG)
 }
 
-func (rr redisResult) String() (string, error) {
+func (rr *redisResult) String() (string, error) {
 	switch val := rr.Value.(type) {
 	case error:
-		return "", rr.Value.(error)
+		return "", val
 	case string:
 		return val, nil
 	case []byte:
@@ -47,16 +65,14 @@ func (rr redisResult) String() (string, error) {
 		return strconv.FormatInt(val, 10), nil
 	case float64:
 		return strconv.FormatFloat(val, 'g', -1, 64), nil
-	case interface{}:
-		return fmt.Sprint(val), nil
 	}
 	return "", errResultFormatMismatch
 }
 
-func (rr redisResult) Int() (int, error) {
+func (rr *redisResult) Int() (int, error) {
 	switch val := rr.Value.(type) {
 	case error:
-		return -1, val
+		return 0, val
 	case int8:
 		return int(val), nil
 	case int16:
@@ -72,13 +88,17 @@ func (rr redisResult) Int() (int, error) {
 	case []byte:
 		return strconv.Atoi(bytes2str(val))
 	}
-	return -1, errResultFormatMismatch
+	return 0, errResultFormatMismatch
 }
 
-func (rr redisResult) Float64() (float64, error) {
+func (rr *redisResult) Float64() (float64, error) {
 	switch val := rr.Value.(type) {
 	case error:
-		return -1, val
+		return 0, val
+	case int8:
+		return float64(val), nil
+	case int16:
+		return float64(val), nil
 	case int:
 		return float64(val), nil
 	case int64:
@@ -88,14 +108,14 @@ func (rr redisResult) Float64() (float64, error) {
 	case string:
 		f, err := strconv.ParseFloat(val, 64)
 		if err != nil {
-			return -1, err
+			return 0, err
 		}
 		return f, nil
 	}
-	return -1, errResultFormatMismatch
+	return 0, errResultFormatMismatch
 }
 
-func (rr redisResult) Strings() ([]string, error) {
+func (rr *redisResult) Strings() ([]string, error) {
 	switch r := rr.Value.(type) {
 	case error:
 		return nil, rr.Value.(error)
@@ -125,7 +145,7 @@ func (rr redisResult) Strings() ([]string, error) {
 	return nil, errResultFormatMismatch
 }
 
-func (rr redisResult) StringMap() (map[string]string, error) {
+func (rr *redisResult) StringMap() (map[string]string, error) {
 	switch r := rr.Value.(type) {
 	case error:
 		return nil, r
@@ -155,6 +175,9 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 
 	case []string:
 		length := len(r)
+		if length%2 != 0 {
+			return nil, errResultFormatMismatch
+		}
 		m := make(map[string]string)
 		for i := 0; i < length; i++ {
 			k := r[i]
@@ -181,7 +204,7 @@ func (rr redisResult) StringMap() (map[string]string, error) {
 	return nil, errResultFormatMismatch
 }
 
-func (rr redisResult) Results() ([]Result, error) {
+func (rr *redisResult) Results() ([]Result, error) {
 	switch r := rr.Value.(type) {
 	case []Result:
 		return r, nil
@@ -189,7 +212,7 @@ func (rr redisResult) Results() ([]Result, error) {
 	return nil, errResultFormatMismatch
 }
 
-func (rr redisResult) Bool() (bool, error) {
+func (rr *redisResult) Bool() (bool, error) {
 	switch val := rr.Value.(type) {
 	case bool:
 		return val, nil
@@ -197,4 +220,71 @@ func (rr redisResult) Bool() (bool, error) {
 		return val != 0, nil
 	}
 	return false, errResultFormatMismatch
+}
+
+func (rr *redisResult) Message() (Message, error) {
+
+	res, err := rr.Results()
+	if err != nil {
+		return Message{}, err
+	}
+
+	t, err := res[0].String()
+	if err != nil {
+		return Message{}, err
+	}
+
+	switch t {
+	case "subscribe", "psubscribe", "unsubscribe", "punsubscribe":
+		if len(res) < 3 {
+			return Message{}, errResultFormatMismatch
+		}
+		channel, err := res[1].String()
+		if err != nil {
+			return Message{}, err
+		}
+		count, err := res[2].Int()
+		if err != nil {
+			return Message{}, err
+		}
+		msg := Message{Type: t, Channel: channel, Count: count}
+		return msg, nil
+
+	case "message":
+		if len(res) < 3 {
+			return Message{}, errResultFormatMismatch
+		}
+		channel, err := res[1].String()
+		if err != nil {
+			return Message{}, err
+		}
+		data, err := res[2].String()
+		if err != nil {
+			return Message{}, err
+		}
+		msg := Message{Type: t, Channel: channel, Data: data}
+		return msg, nil
+	case "pmessage":
+		if len(res) < 4 {
+			return Message{}, errResultFormatMismatch
+		}
+		pattern, err := res[1].String()
+		if err != nil {
+			return Message{}, err
+		}
+		channel, err := res[2].String()
+		if err != nil {
+			return Message{}, err
+		}
+		data, err := res[3].String()
+		if err != nil {
+			return Message{}, err
+		}
+		msg := Message{Type: t, Pattern: pattern, Channel: channel, Data: data}
+		return msg, nil
+
+	default:
+		return Message{}, errResultFormatMismatch
+
+	}
 }
