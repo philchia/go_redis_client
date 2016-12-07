@@ -5,7 +5,7 @@ go_redis_client is a redis client for golang
 [![Build Status](https://travis-ci.org/philchia/go_redis_client.svg?branch=master)](https://travis-ci.org/philchia/go_redis_client)
 [![Coverage Status](https://coveralls.io/repos/github/philchia/go_redis_client/badge.svg?branch=dev)](https://coveralls.io/github/philchia/go_redis_client?branch=dev)
 [![Go Report Card](https://goreportcard.com/badge/github.com/philchia/go_redis_client)](https://goreportcard.com/report/github.com/philchia/go_redis_client)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](http://www.apache.org/licenses/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 [![GoDoc](https://godoc.org/github.com/philchia/go_redis_client/redis?status.svg)](https://godoc.org/github.com/philchia/go_redis_client/redis)
 
 # How to
