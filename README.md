@@ -1,6 +1,6 @@
 # go_redis_client
 
-go_redis_client is a redis client for Go
+go_redis_client is a redis client for Go, which designed to be a successor of redigo 👍
 
 [![Golang](https://img.shields.io/badge/Language-Go-green.svg?style=flat)](https://golang.org)
 [![Build Status](https://travis-ci.org/philchia/go_redis_client.svg?branch=master)](https://travis-ci.org/philchia/go_redis_client)
