@@ -15,7 +15,7 @@ go_redis_client is under heavy development, if you want to use it in your projec
 
 ## How to
 
-## Single command
+### Single command
 
 ```go
     opt := redis.Option{
@@ -40,7 +40,7 @@ go_redis_client is under heavy development, if you want to use it in your projec
     log.Println(res)
 ```
 
-## Pipline
+### Pipline
 
 ```go
     opt := redis.Option{

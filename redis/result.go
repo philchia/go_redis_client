@@ -241,7 +241,6 @@ func (rr *redisResult) Bool() (bool, error) {
 }
 
 func (rr *redisResult) Message() (Message, error) {
-
 	res, err := rr.Results()
 	if err != nil {
 		return Message{}, err
