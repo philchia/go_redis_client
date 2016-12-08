@@ -13,7 +13,6 @@ func TestSubscribe(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer c.Close()
 
 	psc := NewPubSubConn(c, func(msg Message, err error) {
 
