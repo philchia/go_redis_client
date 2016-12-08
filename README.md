@@ -17,7 +17,7 @@ go_redis_client is under heavy development, if you want to use it in your projec
 
 redis_go_client include a benchmark against redigo
 
-![Benchmark with redigo](./assets/bench.png)
+![Benchmark with redigo](./assets/bench.jpg)
 
 ## How to
 
