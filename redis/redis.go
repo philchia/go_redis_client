@@ -34,7 +34,9 @@ func Connect(host, port string, options ...*Option) (Conn, error) {
 		conn.Conf = options[0]
 	}
 	if conn.Conf != nil && len(conn.Conf.Auth) > 0 {
-		conn.Exec("AUTH", conn.Conf.Auth)
+		if conn.Exec("AUTH", conn.Conf.Auth).Error() != nil {
+			return nil, err
+		}
 	}
 	return conn, nil
 }

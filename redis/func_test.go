@@ -192,7 +192,7 @@ func BenchmarkRedigoSetKey(b *testing.B) {
 	defer conn.Close()
 
 	for i := 0; i < b.N; i++ {
-		conn.Do("SET", "name", "chia")
+		conn.Do("SET", "name", "abcd")
 	}
 }
 
