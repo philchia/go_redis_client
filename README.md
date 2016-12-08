@@ -75,10 +75,34 @@ go_redis_client is under heavy development, if you want to use it in your projec
 
 ```
 
+### Subscribe
+
+```go
+    opt := redis.Option{
+        Auth: "password",
+    }
+    conn, err := redis.Connect("127.0.0.1", "6379", &opt)
+    if err != nil {
+        t.Fatal(err)
+    }
+
+    psc := NewPubSubConn(c, func(msg Message, err error) {
+
+    if err != nil {
+        log.Println("=====================", err)
+    } else {
+        log.Println("message", msg)
+    }
+    })
+    defer psc.Close()
+
+    psc.Subscribe("name")
+```
+
 ## Todo
 
-* Pub/Sub
 * Connection pool
+* Cluster support
 
 ## License
 
