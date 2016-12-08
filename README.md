@@ -1,13 +1,13 @@
 # go_redis_client
 
-go_redis_client is a redis client for Go, which designed to be a successor of redigo 👍
-
 [![Golang](https://img.shields.io/badge/Language-Go-green.svg?style=flat)](https://golang.org)
 [![Build Status](https://travis-ci.org/philchia/go_redis_client.svg?branch=master)](https://travis-ci.org/philchia/go_redis_client)
 [![Coverage Status](https://coveralls.io/repos/github/philchia/go_redis_client/badge.svg?branch=dev)](https://coveralls.io/github/philchia/go_redis_client?branch=dev)
 [![Go Report Card](https://goreportcard.com/badge/github.com/philchia/go_redis_client)](https://goreportcard.com/report/github.com/philchia/go_redis_client)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 [![GoDoc](https://godoc.org/github.com/philchia/go_redis_client/redis?status.svg)](https://godoc.org/github.com/philchia/go_redis_client/redis)
+
+go_redis_client is a redis client for Go, which designed to be a successor of redigo 👍
 
 ## Warning
 
@@ -17,7 +17,7 @@ go_redis_client is under heavy development, if you want to use it in your projec
 
 redis_go_client include a benchmark against redigo
 
-![Benchmark with redigo](./assets/bench.png)
+![Benchmark with redigo](./assets/bench.jpg)
 
 ## How to
 
