@@ -1,5 +1,9 @@
 package redis
 
+import (
+	"sync"
+)
+
 var (
 	// This is a compiler check
 	_ PubSubConn = (*pubSubConn)(nil)
@@ -24,6 +28,7 @@ type pubSubConn struct {
 	handler MessageHandler
 	conn    Conn
 	closed  bool
+	mutex   sync.Mutex
 }
 
 // NewPubSubConn create a new pubsub
@@ -42,11 +47,10 @@ func NewPubSubConn(conn Conn, handler MessageHandler) PubSubConn {
 
 // listen to published message or subscription message
 func (c *pubSubConn) listen() {
-	for !c.closed {
+	for {
 		msg, err := c.readMessage()
-		if c.handler != nil {
-			c.handler(msg, err)
-		} else {
+		c.handler(msg, err)
+		if err != nil {
 			return
 		}
 	}
@@ -89,7 +93,5 @@ func (c *pubSubConn) PUnsubscribeAll() error {
 
 // Close close the PubSubConn connection
 func (c *pubSubConn) Close() error {
-	c.closed = true
-	c.handler = nil
 	return c.conn.Close()
 }

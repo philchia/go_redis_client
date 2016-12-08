@@ -41,5 +41,5 @@ func TestSubscribe(t *testing.T) {
 		con.Exec("PUBLISH", "name", "phil")
 	}()
 	wg.Wait()
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 2)
 }
