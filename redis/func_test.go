@@ -96,6 +96,41 @@ func TestMap(t *testing.T) {
 
 }
 
+func TestPing(t *testing.T) {
+	conn, err := dial()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	if !conn.Exec("PING").PONG() {
+		t.Fail()
+	}
+}
+
+func TestPipline(t *testing.T) {
+	conn, err := dial()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+
+	err = conn.Pipline("GET", "name")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = conn.Pipline("GET", "age")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if conn.Commit().Error() != nil {
+		t.Fail()
+	}
+
+}
+
 func BenchmarkRedigoGetKey(b *testing.B) {
 	conn, err := redis1.Dial("tcp", "127.0.0.1:6379")
 	if err != nil {

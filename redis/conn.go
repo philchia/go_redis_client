@@ -15,6 +15,11 @@ const (
 )
 
 var (
+	// here is a compiler check
+	_ Conn = (*connection)(nil)
+)
+
+var (
 	// ErrBufferFull ...
 	ErrBufferFull = errors.New("response too long")
 	// ErrResponseFormat ...
@@ -27,11 +32,12 @@ var (
 
 // Conn represent a connection
 type Conn interface {
+	Send(cmd string, args ...interface{}) error
 	Exec(cmd string, args ...interface{}) (res Result)
 	Close() error
 	Pipline(cmd string, args ...interface{}) error
 	Commit() (res Result)
-	read() Result
+	Read() Result
 }
 
 // connection ...
@@ -52,6 +58,15 @@ func (c *connection) Close() error {
 	return c.Con.Close()
 }
 
+// Send will only write cmd to server
+func (c *connection) Send(cmd string, args ...interface{}) error {
+	err := c.writeCmd(cmd, args...)
+	if err != nil {
+		return err
+	}
+	return c.flush()
+}
+
 // Exec do a single command
 func (c *connection) Exec(cmd string, args ...interface{}) Result {
 	c.Mx.Lock()
@@ -66,7 +81,7 @@ func (c *connection) Exec(cmd string, args ...interface{}) Result {
 	if err := c.flush(); err != nil {
 		return &redisResult{Value: err}
 	}
-	return c.read()
+	return c.Read()
 }
 
 //Pipline cache all the command
@@ -94,7 +109,7 @@ func (c *connection) flush() error {
 	return c.BW.Flush()
 }
 
-func (c *connection) read() Result {
+func (c *connection) Read() Result {
 	size := c.QueueSize
 	c.QueueSize = 0
 	if c.Conf != nil && c.Conf.ReadTimeout > 0 {
