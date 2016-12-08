@@ -1,5 +1,6 @@
 # go_redis_client
-go_redis_client is a redis client for golang
+
+go_redis_client is a redis client for Go
 
 [![Golang](https://img.shields.io/badge/Language-Go-green.svg?style=flat)](https://golang.org)
 [![Build Status](https://travis-ci.org/philchia/go_redis_client.svg?branch=master)](https://travis-ci.org/philchia/go_redis_client)
@@ -8,7 +9,11 @@ go_redis_client is a redis client for golang
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 [![GoDoc](https://godoc.org/github.com/philchia/go_redis_client/redis?status.svg)](https://godoc.org/github.com/philchia/go_redis_client/redis)
 
-# How to
+## Warnning
+
+go_redis_client is under heavy development, if you want to use it in your project, **vendor** it!
+
+## How to
 
 ## Single command
 
@@ -70,7 +75,11 @@ go_redis_client is a redis client for golang
 
 ```
 
-#Todo
+## Todo
 
 * Pub/Sub
 * Connection pool
+
+## License
+
+go_redis_client code is published under MIT license
