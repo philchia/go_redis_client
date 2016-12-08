@@ -12,6 +12,8 @@ import (
 const (
 	// CMDExec represent the exec command
 	CMDExec = "EXEC"
+	// CMDMulti represent the multi command
+	CMDMulti = "MULTI"
 )
 
 var (
@@ -32,11 +34,11 @@ var (
 
 // Conn represent a connection
 type Conn interface {
-	Send(cmd string, args ...interface{}) error
 	Exec(cmd string, args ...interface{}) (res Result)
 	Close() error
 	Pipline(cmd string, args ...interface{}) error
 	Commit() (res Result)
+	Send(cmd string, args ...interface{}) error
 	Read() Result
 }
 
@@ -89,7 +91,7 @@ func (c *connection) Pipline(cmd string, args ...interface{}) error {
 	c.Mx.Lock()
 	defer c.Mx.Unlock()
 	if c.QueueSize == 0 {
-		if err := c.writeCmd("MULTI"); err != nil {
+		if err := c.writeCmd(CMDMulti); err != nil {
 			return err
 		}
 		c.QueueSize++
@@ -99,7 +101,7 @@ func (c *connection) Pipline(cmd string, args ...interface{}) error {
 }
 
 func (c *connection) Commit() Result {
-	return c.Exec("EXEC")
+	return c.Exec(CMDExec)
 }
 
 func (c *connection) flush() error {
@@ -139,7 +141,7 @@ func (c *connection) readReply() Result {
 		switch {
 		case len(bts) == 3 && bts[1] == 'O' && bts[2] == 'K':
 			return OK
-		case len(bts) == 5 && bts[1] == 'P' && bts[2] == 'O' && bts[3] == 'O' && bts[4] == 'G':
+		case len(bts) == 5 && bts[1] == 'P' && bts[2] == 'O' && bts[3] == 'N' && bts[4] == 'G':
 			return PONG
 		default:
 			return &redisResult{Value: bytes2str(bts[1:])}
