@@ -9,7 +9,7 @@ go_redis_client is a redis client for Go
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://opensource.org/licenses/MIT)
 [![GoDoc](https://godoc.org/github.com/philchia/go_redis_client/redis?status.svg)](https://godoc.org/github.com/philchia/go_redis_client/redis)
 
-## Warnning
+## Warning
 
 go_redis_client is under heavy development, if you want to use it in your project, **vendor** it!
 
