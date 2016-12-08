@@ -13,6 +13,12 @@ go_redis_client is a redis client for Go
 
 go_redis_client is under heavy development, if you want to use it in your project, **vendor** it!
 
+## Benchmark
+
+redis_go_client include a benchmark against redigo
+
+![Benchmark with redigo](./assets/bench.png)
+
 ## How to
 
 ### Single command
