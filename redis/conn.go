@@ -117,7 +117,6 @@ func (c *connection) Read() Result {
 	if c.Conf != nil && c.Conf.ReadTimeout > 0 {
 		c.Con.SetReadDeadline(time.Now().Add(c.Conf.WriteTimeout))
 	}
-
 	if size > 1 {
 		res := make([]Result, size)
 		for i := range res {
