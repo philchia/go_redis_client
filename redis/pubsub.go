@@ -1,8 +1,6 @@
 package redis
 
-import (
-	"sync"
-)
+import "sync"
 
 var (
 	// This is a compiler check
@@ -27,8 +25,8 @@ type MessageHandler func(Message, error)
 type pubSubConn struct {
 	handler MessageHandler
 	conn    Conn
-	closed  bool
 	mutex   sync.Mutex
+	done    chan struct{}
 }
 
 // NewPubSubConn create a new pubsub
@@ -36,6 +34,7 @@ func NewPubSubConn(conn Conn, handler MessageHandler) PubSubConn {
 	pubsub := &pubSubConn{
 		conn:    conn,
 		handler: handler,
+		done:    make(chan struct{}),
 	}
 	if handler == nil {
 		return nil
@@ -48,10 +47,15 @@ func NewPubSubConn(conn Conn, handler MessageHandler) PubSubConn {
 // listen to published message or subscription message
 func (c *pubSubConn) listen() {
 	for {
-		msg, err := c.readMessage()
-		c.handler(msg, err)
-		if err != nil {
+		select {
+		case <-c.done:
 			return
+		default:
+			msg, err := c.readMessage()
+			if err != nil {
+				return
+			}
+			c.handler(msg, err)
 		}
 	}
 }
@@ -72,7 +76,6 @@ func (c *pubSubConn) Unsubscribe(channels ...interface{}) error {
 
 // UnsubscribeAll unsubscribe from all subscribed channels
 func (c *pubSubConn) UnsubscribeAll() error {
-	c.handler = nil
 	return c.conn.Exec("UNSUBSCRIBE").Error()
 }
 
@@ -93,5 +96,6 @@ func (c *pubSubConn) PUnsubscribeAll() error {
 
 // Close close the PubSubConn connection
 func (c *pubSubConn) Close() error {
+	close(c.done)
 	return c.conn.Close()
 }
